@@ -1,0 +1,46 @@
+// ExtWebSocket.js — Native WebSocket wrapper for GX.games / HTML5 builds.
+// GML polls ws_has_message() each frame; no async events needed.
+
+var _ws_socket = null;
+var _ws_queue  = [];
+var _ws_open   = false;
+
+function ws_connect(url) {
+    if (_ws_socket) {
+        try { _ws_socket.close(); } catch (_) {}
+    }
+    _ws_queue  = [];
+    _ws_open   = false;
+    _ws_socket = new WebSocket(url);
+    _ws_socket.onopen    = function ()  { _ws_open = true; };
+    _ws_socket.onmessage = function (e) { _ws_queue.push(String(e.data)); };
+    _ws_socket.onerror   = function ()  {};
+    _ws_socket.onclose   = function ()  { _ws_open = false; };
+    return 0;
+}
+
+function ws_is_open()     { return _ws_open ? 1 : 0; }
+function ws_has_message() { return _ws_queue.length > 0 ? 1 : 0; }
+function ws_get_message() { return _ws_queue.length > 0 ? _ws_queue.shift() : ""; }
+
+function ws_send(data) {
+    if (_ws_socket && _ws_open) {
+        try { _ws_socket.send(data); } catch (_) {}
+    }
+    return 0;
+}
+
+function ws_close() {
+    if (_ws_socket) {
+        try { _ws_socket.close(); } catch (_) {}
+        _ws_socket = null;
+    }
+    _ws_open  = false;
+    _ws_queue = [];
+    return 0;
+}
+[LLVM-OPERAGX]
+EMSDKDir="c:/source/emsdk/emsdk.bat"
+[OperaGX]
+ProjectGuid="b399ac4f-169b-4aac-9452-9c8900b54c5c"
+[ExtWebSocket]
