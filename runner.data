@@ -7,6 +7,12 @@ var _ws_open   = false;
 
 function ws_connect(url) {
     if (_ws_socket) {
+        // Null out callbacks BEFORE closing so the async onclose of the old
+        // socket can never fire and corrupt _ws_open for the new connection.
+        _ws_socket.onopen    = null;
+        _ws_socket.onmessage = null;
+        _ws_socket.onerror   = null;
+        _ws_socket.onclose   = null;
         try { _ws_socket.close(); } catch (_) {}
     }
     _ws_queue  = [];
@@ -32,6 +38,12 @@ function ws_send(data) {
 
 function ws_close() {
     if (_ws_socket) {
+        // Null out callbacks first so the deferred onclose can never fire and
+        // corrupt _ws_open after a new ws_connect() has already been issued.
+        _ws_socket.onopen    = null;
+        _ws_socket.onmessage = null;
+        _ws_socket.onerror   = null;
+        _ws_socket.onclose   = null;
         try { _ws_socket.close(); } catch (_) {}
         _ws_socket = null;
     }
